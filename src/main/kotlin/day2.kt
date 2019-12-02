@@ -1,8 +1,4 @@
 
-val ADD = 1
-val MUL = 2
-val END = 99
-
 fun main() {
 
     val program = inputsDay2.split(",").map(String::toInt)
@@ -22,27 +18,47 @@ fun run(program: List<Int>, noun: Int, verb: Int): Int {
     memory[1] = noun
     memory[2] = verb
 
-    var currentPos = 0
+//    var currentPos = 0
+//
+//    fun addAndSave(a: Int, b: Int, savePos: Int) {
+//        val newValue = memory[a] + memory[b]
+//        memory[savePos] = newValue
+//        currentPos += 4
+//    }
+//
+//    fun mulAndSave(a: Int, b: Int, savePos: Int) {
+//        val newValue = memory[a] * memory[b]
+//        memory[savePos] = newValue
+//        currentPos += 4
+//    }
+//
+//    loop@while (true) {
+//        when (val opcode = memory[currentPos]) {
+//            ADD -> addAndSave((memory[currentPos+1]), (memory[currentPos+2]), (memory[currentPos+3]))
+//            MUL -> mulAndSave((memory[currentPos+1]), (memory[currentPos+2]), (memory[currentPos+3]))
+//            END -> break@loop
+//            else -> error("unknown opcode $opcode")
+//        }
+//    }
 
-    fun addAndSave(a: Int, b: Int, savePos: Int) {
-        val newValue = memory[a] + memory[b]
-        memory[savePos] = newValue
-        currentPos += 4
-    }
-
-    fun mulAndSave(a: Int, b: Int, savePos: Int) {
-        val newValue = memory[a] * memory[b]
-        memory[savePos] = newValue
-        currentPos += 4
-    }
+    // better solution:
+    var instrPtr = 0;
 
     loop@while (true) {
-        when (val opcode = memory[currentPos]) {
-            ADD -> addAndSave((memory[currentPos+1]), (memory[currentPos+2]), (memory[currentPos+3]))
-            MUL -> mulAndSave((memory[currentPos+1]), (memory[currentPos+2]), (memory[currentPos+3]))
-            END -> break@loop
+        // regarding the instruction code, create a lambda with add/mul operation in body
+        val op: (Int, Int) -> Int = when(val opcode = memory[instrPtr]) {
+            1 -> Int::plus
+            2 -> Int::times
+            99 -> break@loop
             else -> error("unknown opcode $opcode")
         }
+
+        // execute the lambda add/mul with ptr+1 and ptr+2 values
+        val value1 = memory[instrPtr + 1]
+        val value2 = memory[instrPtr + 2]
+        val writePos = memory[instrPtr + 3]
+        memory[writePos] = op(memory[value1], memory[value2])
+        instrPtr += 4
     }
 
     return memory[0]
