@@ -3,7 +3,10 @@ fun main() {
     val program = inputsDay5.split(",").map(String::toInt)
 
     // part 1
-    println("part1: " + run(program, 1))
+//    println("part1: " + run(program, 1))
+
+    // part 2
+    println("part2: " + run(program, 5))
 }
 
 fun run(program: List<Int>, input: Int) : Int {
@@ -11,7 +14,7 @@ fun run(program: List<Int>, input: Int) : Int {
     val memory = program.toMutableList()
     var instrPtr = 0
 
-    fun getRef(pos: Int, mode: Char) = when (mode) {
+    fun getReelPos(pos: Int, mode: Char) = when (mode) {
         '0' -> memory[pos]
         '1' -> pos
         else -> error("unknown memory mode $mode")
@@ -29,54 +32,59 @@ fun run(program: List<Int>, input: Int) : Int {
 
         when(opcode.toInt()) {
             1 -> {
-                val value1 = getRef(instrPtr + 1, memMode1Param)
-                val value2 = getRef(instrPtr + 2, memMode2Param)
-                val writePos = getRef(instrPtr + 3, memMode3Param)
+                val value1 = getReelPos(instrPtr + 1, memMode1Param)
+                val value2 = getReelPos(instrPtr + 2, memMode2Param)
+                val writePos = getReelPos(instrPtr + 3, memMode3Param)
 
                 memory[writePos] = memory[value1] + memory[value2]
                 instrPtr += 4
             }
             2 -> {
-                val value1 = getRef(instrPtr + 1, memMode1Param)
-                val value2 = getRef(instrPtr + 2, memMode2Param)
-                val writePos = getRef(instrPtr + 3, memMode3Param)
+                val value1 = getReelPos(instrPtr + 1, memMode1Param)
+                val value2 = getReelPos(instrPtr + 2, memMode2Param)
+                val writePos = getReelPos(instrPtr + 3, memMode3Param)
 
                 memory[writePos] = memory[value1] * memory[value2]
                 instrPtr += 4
             }
             3 -> {
-                val writePos = getRef(instrPtr + 1, memMode1Param)
+                val writePos = getReelPos(instrPtr + 1, memMode1Param)
                 memory[writePos] = input
                 instrPtr += 2
             }
             4 -> {
-                val value = getRef(instrPtr + 1, memMode1Param)
+                val value = getReelPos(instrPtr + 1, memMode1Param)
                 instrPtr += 2
                 output.add(memory[value])
             }
-//            5 -> {
-//                val value = getRef(instrPtr + 1, memMode1Param)
-//                instrPtr += 2
-//                output.add(memory[value])
-//            }
-//            6 -> {
-//                val value = getRef(instrPtr + 1, memMode1Param)
-//                instrPtr += 2
-//                output.add(memory[value])
-//            }
-//            7 -> {
-//                val value = getRef(instrPtr + 1, memMode1Param)
-//                instrPtr += 2
-//                output.add(memory[value])
-//            }
-//            8 -> {
-//                val value = getRef(instrPtr + 1, memMode1Param)
-//                instrPtr += 2
-//                output.add(memory[value])
-//            }
+            5 -> {
+                val value1 = getReelPos(instrPtr + 1, memMode1Param)
+                val value2 = getReelPos(instrPtr + 2, memMode2Param)
+                instrPtr = if (memory[value1] != 0) memory[value2] else instrPtr + 3
+            }
+            6 -> {
+                val value1 = getReelPos(instrPtr + 1, memMode1Param)
+                val value2 = getReelPos(instrPtr + 2, memMode2Param)
+                instrPtr = if (memory[value1] == 0) memory[value2] else instrPtr + 3
+            }
+            7 -> {
+                val value1 = getReelPos(instrPtr + 1, memMode1Param)
+                val value2 = getReelPos(instrPtr + 2, memMode2Param)
+                val writePos = getReelPos(instrPtr + 3, memMode3Param)
+                memory[writePos] = if (memory[value1] < memory[value2]) 1 else 0
+                instrPtr += 4
+            }
+            8 -> {
+                val value1 = getReelPos(instrPtr + 1, memMode1Param)
+                val value2 = getReelPos(instrPtr + 2, memMode2Param)
+                val writePos = getReelPos(instrPtr + 3, memMode3Param)
+                memory[writePos] = if (memory[value1] == memory[value2]) 1 else 0
+                instrPtr += 4
+            }
             99 -> break@loop
             else -> error("unknown opcode $opcode")
         }
+        println(instrPtr)
     }
     return output.last()
 }
